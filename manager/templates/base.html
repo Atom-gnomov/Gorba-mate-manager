@@ -4,7 +4,7 @@
   {% load static %}
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}My Project{% endblock %}</title>
+  <title>{% block title %}<a href = {% url 'manager:index' %} >My Project</a>{% endblock %}</title>
   <link rel="icon" href="{% static 'img/favicon.ico' %}">
 
   <!-- Tailwind CSS CDN -->
@@ -19,7 +19,7 @@
     <nav class="container mx-auto flex items-center justify-between px-4 py-3">
       <a href="{% url 'manager:index' %}" class="text-white font-semibold text-lg">MyProject</a>
       <ul class="flex space-x-4">
-        <li><a href="{% url 'manager:index' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Tasks</a></li>
+        <li><a href="{% url "manager:task_list" %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Tasks</a></li>
         <li><a href="" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Workers</a></li>
         <li><a href="" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">About</a></li>
       </ul>

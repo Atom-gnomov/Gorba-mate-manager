@@ -72,6 +72,18 @@ class TaskDetailView(DetailView):
     template_name = "TaskDetails.html"
 
 
+class TaskListView(ListView):
+    model = Task
+    context_object_name = "tasks"
+    template_name = "TaskList.html"
+    paginate_by = 10
+
+class TaskCreateView(CreateView):
+    model = Task
+    context_object_name = "task"
+    success_url = reverse_lazy("TaskList")
+
+
 
 
 

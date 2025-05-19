@@ -58,16 +58,24 @@
 
     <!-- Workers list -->
     <section>
-      <h2 class="text-lg font-semibold mb-2">Assignees</h2>
-      {% if task.assignees.exists %}
-        <ul class="list-disc list-inside space-y-1">
+      <h2 class="text-lg font-semibold mb-2"><section>
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-semibold">Assignees</h2>
+        <a href="" class="px-3 py-1.5 rounded-md bg-gray-800 bg-opacity-20 hover:bg-opacity-30 text-xs font-medium">+ Add&nbsp;worker</a>
+      </div>
+
+      <div class="rounded-lg bg-white/20 p-4 space-y-3">
+        {% if task.assignees.exists %}
           {% for worker in task.assignees.all %}
-            <li>{{ worker.get_full_name|default:worker.username }}</li>
+            <div class="flex items-center justify-between bg-white/10 px-3 py-2 rounded">
+              <span>{{ worker.get_full_name|default:worker.username }}</span>
+              <a href="" class="text-red-200 hover:text-red-300 text-xs font-semibold">✕ Remove</a>
+            </div>
           {% endfor %}
-        </ul>
-      {% else %}
-        <p class="italic">No workers assigned.</p>
-      {% endif %}
+        {% else %}
+          <p class="italic text-sm">No workers assigned.</p>
+        {% endif %}
+      </div>
     </section>
   </div>
 </article>
