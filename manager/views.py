@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model, login
 from django.db.models import IntegerField, When
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -117,3 +118,23 @@ class TaskCompleteView(View):
         Task.objects.filter(pk=pk).update(is_completed=True)
         return redirect("manager:task_details", pk=pk)
 
+
+
+User = get_user_model()
+
+
+class WorkerCreationForm:
+    pass
+
+
+class RegisterView(CreateView):
+    form_class = WorkerCreationForm
+    template_name = "registration/register.html"
+    success_url = reverse_lazy("login")
+
+    def form_valid(self, form):
+        # save the new user...
+        response = super().form_valid(form)
+        # (optional) log them in immediately:
+        login(self.request, self.object)
+        return response

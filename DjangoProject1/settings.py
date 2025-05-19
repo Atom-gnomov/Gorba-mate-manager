@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django.contrib.auth',
+    "django.contrib.admin",
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -69,6 +70,9 @@ TEMPLATES = [
     },
 ]
 
+LOGIN_REDIRECT_URL = "task_list"
+LOGOUT_REDIRECT_URL = "login"
+LOGIN_URL = "login"
 WSGI_APPLICATION = 'DjangoProject1.wsgi.application'
 
 

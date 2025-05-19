@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+  <h2 class="text-xl font-semibold mb-4">Register</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div class="mb-4">
+        <label for="{{ field.id_for_label }}" class="block text-sm font-medium">
+          {{ field.label }}
+        </label>
+        {{ field|add_class:"mt-1 block w-full rounded border-gray-300 shadow-sm" }}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <button type="submit" class="w-full py-2 bg-green-600 text-white rounded">
+      Register
+    </button>
+  </form>
+</div>
+{% endblock %}
