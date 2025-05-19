@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Delete {{ object }}{% endblock %}
+
+{% block content %}
+  <div class="max-w-md mx-auto p-6 bg-white rounded shadow">
+    <h2 class="text-xl font-semibold mb-4">
+      Are you sure you want to delete “{{ object }}”?
+    </h2>
+    <form method="post">{% csrf_token %}
+      <button type="submit"
+              class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+        Yes, delete
+      </button>
+      <a href="{% url 'manager:worker_list' %}"
+         class="ml-4 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+        Cancel
+      </a>
+    </form>
+  </div>
+{% endblock %}

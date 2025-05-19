@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, DeleteView
 from manager.models import *
 from urllib.parse import urlencode
 from django.views.generic import ListView
@@ -81,9 +81,34 @@ class TaskListView(ListView):
 class TaskCreateView(CreateView):
     model = Task
     context_object_name = "task"
-    success_url = reverse_lazy("TaskList")
+    fields = ("name", "description", "task_type", "priority",
+              "deadline", "assignees")
+    success_url = reverse_lazy("manager:task_list")
+    template_name = "TaskCreate.html"
 
 
+class WorkerListView(ListView):
+    model = Worker
+    context_object_name = "workers"
+    template_name = "WorkerList.html"
+
+
+class WorkerDetailView(DetailView):
+    model = Worker
+    context_object_name = "worker"
+    template_name = "WorkerDetail.html"
+
+
+class WorkerCreateView(CreateView):
+    model = Worker
+    fields = ["username", "first_name", "last_name", "position"]  # whatever your form needs
+    template_name = "WorkerCreate.html"
+    success_url = reverse_lazy("manager:worker_list")
+
+class WorkerDeleteView(DeleteView):
+    model = Worker
+    template_name = "WorkerConfirmDelete.html"
+    success_url = reverse_lazy("manager:worker_list")
 
 
 

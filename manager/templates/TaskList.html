@@ -8,7 +8,7 @@
   {# ───────── Header & "Add task" button ───────── #}
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-semibold">All Tasks</h1>
-    <a href="" class="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium shadow hover:bg-indigo-700 transition">
+    <a href="{% url "manager:task_create" %}" class="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium shadow hover:bg-indigo-700 transition">
       ＋ Add&nbsp;Task
     </a>
   </div>

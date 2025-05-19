@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Workers{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-semibold">Workers</h1>
+    <a href="{% url 'manager:worker_create' %}"
+       class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+      + Add worker
+    </a>
+  </div>
+
+  {% if workers %}
+    <div class="bg-white shadow rounded-lg overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50 text-left text-sm font-semibold text-gray-600">
+          <tr>
+            <th class="px-4 py-3">Username</th>
+            <th class="px-4 py-3">Full name</th>
+            <th class="px-4 py-3">Position</th>
+            <th class="px-4 py-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-sm">
+          {% for w in workers %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2">{{ w.username }}</td>
+              <td class="px-4 py-2">{{ w.first_name }} {{ w.last_name }}</td>
+              <td class="px-4 py-2">{{ w.position }}</td>
+              <td class="px-4 py-2 text-right space-x-2">
+                <a href="{% url 'manager:worker_detail' w.pk %}"
+                   class="text-indigo-600 hover:underline">View</a>
+                <a href="{% url 'manager:worker_delete' w.pk %}"
+                   class="text-red-600 hover:underline">Delete</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-gray-600">No workers found.</p>
+  {% endif %}
+</div>
+{% endblock %}

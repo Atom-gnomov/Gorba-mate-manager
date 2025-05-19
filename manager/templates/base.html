@@ -20,7 +20,7 @@
       <a href="{% url 'manager:index' %}" class="text-white font-semibold text-lg">MyProject</a>
       <ul class="flex space-x-4">
         <li><a href="{% url "manager:task_list" %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Tasks</a></li>
-        <li><a href="" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Workers</a></li>
+        <li><a href="{% url "manager:worker_list" %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Workers</a></li>
         <li><a href="" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">About</a></li>
       </ul>
     </nav>
