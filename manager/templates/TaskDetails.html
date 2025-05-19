@@ -1,83 +1,111 @@
+{# manager/templates/TaskDetail.html #}
 {% extends "base.html" %}
 {% load tz %}
 
 {% block title %}Task Details | {{ task.name }}{% endblock %}
 
 {% block content %}
-{% now "UTC" as utcnow %}
+  {% now "UTC" as utcnow %}
+  <article
+    class="max-w-3xl mx-auto rounded-xl shadow overflow-hidden
+      {% if task.is_completed %}bg-green-600 text-white
+      {% elif task.priority == 'Urgent' %}bg-red-600 text-white
+      {% elif task.priority == 'High' %}bg-orange-500 text-white
+      {% elif task.priority == 'Normal' %}bg-yellow-400 text-gray-900
+      {% else %}bg-blue-500 text-white{% endif %}"
+  >
 
-<article
-  class="max-w-3xl mx-auto rounded-xl shadow overflow-hidden
-    {% if task.is_completed %}bg-green-600 text-white
-    {% elif task.priority == 'Urgent' %}bg-red-600 text-white
-    {% elif task.priority == 'High' %}bg-orange-500 text-white
-    {% elif task.priority == 'Normal' %}bg-yellow-400 text-gray-900
-    {% else %}bg-blue-500 text-white{% endif %}">
+    {# Expired pulse bar #}
+    {% if not task.is_completed and task.deadline and task.deadline < utcnow %}
+      <div class="w-full h-1 bg-red-700 animate-pulse"></div>
+    {% endif %}
 
-  {# thin red bar if expired and not completed #}
-  {% if not task.is_completed and task.deadline and task.deadline < utcnow %}
-    <div class="w-full h-1 bg-red-700 animate-pulse"></div>
-  {% endif %}
+    <div class="p-8 space-y-6">
+      <!-- Title & priority badge -->
+      <header class="flex items-center justify-between">
+        <h1 class="text-2xl font-semibold truncate">{{ task.name }}</h1>
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold
+          {% if task.is_completed %}bg-green-800
+          {% elif task.priority == 'Urgent' %}bg-red-800
+          {% elif task.priority == 'High' %}bg-orange-700
+          {% elif task.priority == 'Normal' %}bg-yellow-600 text-gray-900
+          {% else %}bg-blue-700{% endif %}">
+          {{ task.priority }}{% if task.is_completed %} · Done{% endif %}
+        </span>
+      </header>
 
-  <div class="p-8 space-y-6">
-    <!-- Title & priority badge -->
-    <header class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold truncate">{{ task.name }}</h1>
-      <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold
-        {% if task.is_completed %}bg-green-800
-        {% elif task.priority == 'Urgent' %}bg-red-800
-        {% elif task.priority == 'High' %}bg-orange-700
-        {% elif task.priority == 'Normal' %}bg-yellow-600 text-gray-900
-        {% else %}bg-blue-700{% endif %}">
-        {{ task.priority }}{% if task.is_completed %} · Done{% endif %}
-      </span>
-    </header>
+      {# ——— Mark as completed button ——— #}
+      {% if not task.is_completed %}
+        <form method="post"
+              action="{% url 'manager:task_complete' task.pk %}"
+              class="inline">
+          {% csrf_token %}
+          <button
+            type="submit"
+            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+            ✔ Mark as completed
+          </button>
+        </form>
+      {% endif %}
 
-    <!-- Description -->
-    <p class="leading-relaxed">{{ task.description }}</p>
+      <!-- Description -->
+      <p class="leading-relaxed">{{ task.description }}</p>
 
-    <!-- Meta info -->
-    <div class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
-      <div class="font-medium">Task type:</div>
-      <div>{{ task.task_type.name }}</div>
+      <!-- Meta info -->
+      <div class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
+        <div class="font-medium">Task type:</div>
+        <div>{{ task.task_type.name }}</div>
 
-      <div class="font-medium">Deadline:</div>
-      <div>
-        {% if task.deadline %}
-          {% if not task.is_completed and task.deadline < utcnow %}
-            <span class="text-red-200 font-semibold">{{ task.deadline|date:"Y-m-d H:i" }} (expired)</span>
+        <div class="font-medium">Deadline:</div>
+        <div>
+          {% if task.deadline %}
+            {% if not task.is_completed and task.deadline < utcnow %}
+              <span class="text-red-200 font-semibold">
+                {{ task.deadline|date:"Y-m-d H:i" }} (expired)
+              </span>
+            {% else %}
+              {{ task.deadline|date:"Y-m-d H:i" }}
+            {% endif %}
+          {% else %}—{% endif %}
+        </div>
+
+        <div class="font-medium">Completed:</div>
+        <div>
+          {% if task.is_completed %}
+            <span class="text-green-200 font-semibold">Yes ✔</span>
           {% else %}
-            {{ task.deadline|date:"Y-m-d H:i" }}
+            No
           {% endif %}
-        {% else %}—{% endif %}
+        </div>
       </div>
 
-      <div class="font-medium">Completed:</div>
-      <div>{% if task.is_completed %}<span class="text-green-200 font-semibold">Yes ✔</span>{% else %}No{% endif %}</div>
+      <!-- Assignees -->
+      <section>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-lg font-semibold">Assignees</h2>
+          <a href=""
+             class="px-3 py-1.5 rounded-md bg-gray-800 bg-opacity-20
+                    hover:bg-opacity-30 text-xs font-medium">
+            + Add&nbsp;worker
+          </a>
+        </div>
+        <div class="rounded-lg bg-white/20 p-4 space-y-3">
+          {% if task.assignees.exists %}
+            {% for worker in task.assignees.all %}
+              <div class="flex items-center justify-between
+                          bg-white/10 px-3 py-2 rounded">
+                <span>{{ worker.get_full_name|default:worker.username }}</span>
+                <a href="#"
+                   class="text-red-200 hover:text-red-300 text-xs font-semibold">
+                  ✕ Remove
+                </a>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="italic text-sm">No workers assigned.</p>
+          {% endif %}
+        </div>
+      </section>
     </div>
-
-    <!-- Workers list -->
-    <section>
-      <h2 class="text-lg font-semibold mb-2"><section>
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="text-lg font-semibold">Assignees</h2>
-        <a href="" class="px-3 py-1.5 rounded-md bg-gray-800 bg-opacity-20 hover:bg-opacity-30 text-xs font-medium">+ Add&nbsp;worker</a>
-      </div>
-
-      <div class="rounded-lg bg-white/20 p-4 space-y-3">
-        {% if task.assignees.exists %}
-          {% for worker in task.assignees.all %}
-            <div class="flex items-center justify-between bg-white/10 px-3 py-2 rounded">
-              <span>{{ worker.get_full_name|default:worker.username }}</span>
-              <a href="" class="text-red-200 hover:text-red-300 text-xs font-semibold">✕ Remove</a>
-            </div>
-          {% endfor %}
-        {% else %}
-          <p class="italic text-sm">No workers assigned.</p>
-        {% endif %}
-      </div>
-    </section>
-  </div>
-</article>
-
+  </article>
 {% endblock %}

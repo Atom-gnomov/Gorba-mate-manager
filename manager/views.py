@@ -1,8 +1,9 @@
 from django.db.models import IntegerField, When
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
+from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, DeleteView
 from manager.models import *
 from urllib.parse import urlencode
@@ -110,5 +111,9 @@ class WorkerDeleteView(DeleteView):
     template_name = "WorkerConfirmDelete.html"
     success_url = reverse_lazy("manager:worker_list")
 
-
+class TaskCompleteView(View):
+    def post(self, request, pk):
+        # does a single SQL UPDATE and touches no other columns
+        Task.objects.filter(pk=pk).update(is_completed=True)
+        return redirect("manager:task_details", pk=pk)
 
