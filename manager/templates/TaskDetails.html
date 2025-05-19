@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block title %}Task Details | {{ task.name }}{% endblock %}
+
+{% block content %}
+{% now "UTC" as utcnow %}
+
+<article
+  class="max-w-3xl mx-auto rounded-xl shadow overflow-hidden
+    {% if task.is_completed %}bg-green-600 text-white
+    {% elif task.priority == 'Urgent' %}bg-red-600 text-white
+    {% elif task.priority == 'High' %}bg-orange-500 text-white
+    {% elif task.priority == 'Normal' %}bg-yellow-400 text-gray-900
+    {% else %}bg-blue-500 text-white{% endif %}">
+
+  {# thin red bar if expired and not completed #}
+  {% if not task.is_completed and task.deadline and task.deadline < utcnow %}
+    <div class="w-full h-1 bg-red-700 animate-pulse"></div>
+  {% endif %}
+
+  <div class="p-8 space-y-6">
+    <!-- Title & priority badge -->
+    <header class="flex items-center justify-between">
+      <h1 class="text-2xl font-semibold truncate">{{ task.name }}</h1>
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold
+        {% if task.is_completed %}bg-green-800
+        {% elif task.priority == 'Urgent' %}bg-red-800
+        {% elif task.priority == 'High' %}bg-orange-700
+        {% elif task.priority == 'Normal' %}bg-yellow-600 text-gray-900
+        {% else %}bg-blue-700{% endif %}">
+        {{ task.priority }}{% if task.is_completed %} · Done{% endif %}
+      </span>
+    </header>
+
+    <!-- Description -->
+    <p class="leading-relaxed">{{ task.description }}</p>
+
+    <!-- Meta info -->
+    <div class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
+      <div class="font-medium">Task type:</div>
+      <div>{{ task.task_type.name }}</div>
+
+      <div class="font-medium">Deadline:</div>
+      <div>
+        {% if task.deadline %}
+          {% if not task.is_completed and task.deadline < utcnow %}
+            <span class="text-red-200 font-semibold">{{ task.deadline|date:"Y-m-d H:i" }} (expired)</span>
+          {% else %}
+            {{ task.deadline|date:"Y-m-d H:i" }}
+          {% endif %}
+        {% else %}—{% endif %}
+      </div>
+
+      <div class="font-medium">Completed:</div>
+      <div>{% if task.is_completed %}<span class="text-green-200 font-semibold">Yes ✔</span>{% else %}No{% endif %}</div>
+    </div>
+
+    <!-- Workers list -->
+    <section>
+      <h2 class="text-lg font-semibold mb-2">Assignees</h2>
+      {% if task.assignees.exists %}
+        <ul class="list-disc list-inside space-y-1">
+          {% for worker in task.assignees.all %}
+            <li>{{ worker.get_full_name|default:worker.username }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="italic">No workers assigned.</p>
+      {% endif %}
+    </section>
+  </div>
+</article>
+
+{% endblock %}

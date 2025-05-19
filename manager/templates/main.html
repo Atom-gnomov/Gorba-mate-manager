@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block title %}Home | My Project{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-2xl font-semibold mb-4">Main Page</h1>
+  <h2>List of uncompleted tasks</h2>
+
+  {# ------------ Sorting toggles ------------- #}
+  {% with sd=request.GET.sort_deadline sp=request.GET.sort_priority %}
+    <div class="flex space-x-4 mb-6">
+      <a href="?{% if not sd %}sort_deadline=1{% endif %}{% if sp %}{% if not sd %}&{% endif %}sort_priority=1{% endif %}"
+         class="px-4 py-2 rounded-lg transition-colors duration-150 text-sm font-medium {% if sd %}bg-indigo-600 text-white hover:bg-indigo-700{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+        Deadline{% if sd %} ✓{% endif %}
+      </a>
+      <a href="?{% if sd %}sort_deadline=1{% endif %}{% if sd or not sp %}&{% endif %}{% if not sp %}sort_priority=1{% endif %}"
+         class="px-4 py-2 rounded-lg transition-colors duration-150 text-sm font-medium {% if sp %}bg-indigo-600 text-white hover:bg-indigo-700{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+        Priority{% if sp %} ✓{% endif %}
+      </a>
+    </div>
+  {% endwith %}
+
+  {% if tasks %}
+    <ul class="space-y-6">
+      {% for task in tasks %}
+        {% cycle 'bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600' 'bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500' 'bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500' 'bg-gradient-to-r from-purple-400 via-fuchsia-500 to-rose-500' as grad silent %}
+
+        <li class="shadow rounded-xl overflow-hidden {% if task.is_expired %}ring-4 ring-red-500{% endif %}">
+          <div class="{{ grad }} p-6 text-white flex justify-between items-start">
+            <div class="pr-4 overflow-hidden">
+              <h2 class="text-lg font-semibold truncate">{{ task.name }}</h2>
+              <p class="text-sm opacity-90 mt-1 line-clamp-2">{{ task.description }}</p>
+              <p class="text-xs opacity-80 mt-2">Priority: {{ task.priority }} · Deadline: {{ task.deadline|date:"Y-m-d H:i" }}</p>
+            </div>
+            <a href="{% url 'manager:task_details' task.pk %}" class="text-sm underline underline-offset-4 shrink-0 self-center">Details →</a>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-600">No tasks to display.</p>
+  {% endif %}
+
+{# ---------------- Pagination ---------------- #}
+{% if is_paginated %}
+  <nav class="mt-10 flex justify-center" aria-label="Pagination">
+    <ul class="inline-flex items-center space-x-1 text-sm font-medium">
+
+      {% if page_obj.has_previous %}
+        <li><a href="{{ base_qs }}page=1"                       class="px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300">« First</a></li>
+        <li><a href="{{ base_qs }}page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300">‹ Prev</a></li>
+      {% else %}
+        <li><span class="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">« First</span></li>
+        <li><span class="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">‹ Prev</span></li>
+      {% endif %}
+
+      <li><span class="px-4 py-1.5 rounded-lg bg-indigo-600 text-white">
+        Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+      </span></li>
+
+      {% if page_obj.has_next %}
+        <li><a href="{{ base_qs }}page={{ page_obj.next_page_number }}"  class="px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300">Next ›</a></li>
+        <li><a href="{{ base_qs }}page={{ page_obj.paginator.num_pages }}" class="px-3 py-1.5 rounded-lg bg-gray-200 hover:bg-gray-300">Last »</a></li>
+      {% else %}
+        <li><span class="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">Next ›</span></li>
+        <li><span class="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">Last »</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}
+</div>
+{% endblock %}

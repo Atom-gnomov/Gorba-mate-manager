@@ -2,20 +2,39 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
 
-class Position(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-
-
 class TaskType(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
 
+class Position(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Worker(AbstractUser):
-    position =  models.ForeignKey(Position,on_delete=models.CASCADE)
+    position = models.ForeignKey(Position, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.get_full_name() or self.username
+
 
 class Task(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField()
     deadline = models.DateTimeField()
     is_completed = models.BooleanField()
-    priority =
+    PRIORITY_TYPE = (
+        ("Urgent", "Urgent"),
+        ("High",   "High"),
+        ("Normal", "Normal"),
+        ("Low",    "Low"),
+    )
+    priority = models.CharField(max_length=10, choices=PRIORITY_TYPE)
+    task_type = models.ForeignKey(TaskType, on_delete=models.CASCADE)
+    assignees = models.ManyToManyField(
+        Worker,
+        related_name="tasks",
+        blank=True
+    )
