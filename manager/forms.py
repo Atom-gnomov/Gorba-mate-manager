@@ -4,13 +4,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Task
+from .models import Task, Worker, Position
+
 
 # manager/forms.py
 class TaskForm(forms.ModelForm):
     class Meta:
         model  = Task
-        fields = [...]
+        fields = "__all__"
         widgets = {
             "name": forms.TextInput(attrs={
                 "class": "mt-1 block w-full rounded-lg border-gray-300 shadow-sm "
@@ -65,3 +66,16 @@ class CustomUserCreationForm(UserCreationForm):
             field.widget.attrs.update({
                 "class": "mt-1 block w-full rounded border-gray-300 shadow-sm",
             })
+
+
+class WorkerCreationForm(UserCreationForm):
+    position = forms.ModelChoiceField(
+        queryset=Position.objects.all(),
+        widget=forms.Select(attrs={
+            "class": "mt-1 block w-full rounded border-gray-300 shadow-sm",
+        }),
+    )
+
+    class Meta:
+        model = Worker
+        fields = ['username', 'email', 'position', 'password1', 'password2']

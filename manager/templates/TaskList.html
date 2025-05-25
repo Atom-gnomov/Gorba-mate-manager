@@ -13,6 +13,11 @@
     </a>
   </div>
 
+<form method="get" action="{% url 'manager:task_list' %}">
+    <input type="text" name="q" placeholder="Search tasks..." value="{{ query }}">
+    <button type="submit">Search</button>
+</form>
+
   {% now "UTC" as utcnow %}
   {% with sort=request.GET.sort page=request.GET.page %}
 

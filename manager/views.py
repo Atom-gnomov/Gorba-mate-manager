@@ -5,7 +5,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views import View
-from django.views.generic import ListView, DetailView, CreateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
+
+from manager.forms import WorkerCreationForm
 from manager.models import *
 from urllib.parse import urlencode
 from django.views.generic import ListView
@@ -14,7 +16,7 @@ from django.utils import timezone
 
 PRIO_ORDER = {"Urgent": 0, "High": 1, "Normal": 2, "Low": 3}
 
-class HomePageView(ListView):
+class HomePageView(ListView, LoginRequiredMixin):
     model = Task
     context_object_name = "tasks"
     template_name = "main.html"
@@ -68,19 +70,36 @@ class HomePageView(ListView):
         return ctx
 
 
-class TaskDetailView(DetailView):
+class TaskDetailView(DetailView, LoginRequiredMixin):
     model = Task
     context_object_name = "task"
     template_name = "TaskDetails.html"
 
 
-class TaskListView(ListView):
+class TaskListView(ListView, LoginRequiredMixin):
     model = Task
-    context_object_name = "tasks"
-    template_name = "TaskList.html"
-    paginate_by = 10
+    template_name = "TaskList.html"  # Adjust if your template name is different
+    context_object_name = "tasks"    # Optional: customize the variable name in the template
+    paginate_by = 10                 # Optional: if you're using pagination
 
-class TaskCreateView(CreateView):
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(name__icontains=query) |
+                Q(description__icontains=query)
+            )
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query = self.request.GET.get('q')
+        if query:
+            context['query'] = query
+        return context
+
+class TaskCreateView(CreateView, LoginRequiredMixin):
     model = Task
     context_object_name = "task"
     fields = ("name", "description", "task_type", "priority",
@@ -89,13 +108,30 @@ class TaskCreateView(CreateView):
     template_name = "TaskCreate.html"
 
 
-class WorkerListView(ListView):
+class WorkerListView(ListView, LoginRequiredMixin):
     model = Worker
     context_object_name = "workers"
     template_name = "WorkerList.html"
+    paginate_by = 10
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(username__icontains=query) |
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query) |
+                Q(position__name__icontains=query)
+            )
+        return queryset
 
-class WorkerDetailView(DetailView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['query'] = self.request.GET.get('q', '')
+        return context
+
+class WorkerDetailView(DetailView, LoginRequiredMixin):
     model = Worker
     context_object_name = "worker"
     template_name = "WorkerDetail.html"
@@ -107,14 +143,13 @@ class WorkerCreateView(CreateView):
     template_name = "WorkerCreate.html"
     success_url = reverse_lazy("manager:worker_list")
 
-class WorkerDeleteView(DeleteView):
+class WorkerDeleteView(DeleteView, LoginRequiredMixin):
     model = Worker
     template_name = "WorkerConfirmDelete.html"
     success_url = reverse_lazy("manager:worker_list")
 
-class TaskCompleteView(View):
+class TaskCompleteView(View, LoginRequiredMixin):
     def post(self, request, pk):
-        # does a single SQL UPDATE and touches no other columns
         Task.objects.filter(pk=pk).update(is_completed=True)
         return redirect("manager:task_details", pk=pk)
 
@@ -123,9 +158,11 @@ class TaskCompleteView(View):
 User = get_user_model()
 
 
-class WorkerCreationForm:
-    pass
-
+class WorkerUpdateView(LoginRequiredMixin, UpdateView):
+    model = Worker
+    fields = ["username", "first_name", "last_name", "position"]
+    template_name = "WorkerUpdate.html"
+    success_url = reverse_lazy("manager:worker_list")
 
 class RegisterView(CreateView):
     form_class = WorkerCreationForm
@@ -133,8 +170,6 @@ class RegisterView(CreateView):
     success_url = reverse_lazy("login")
 
     def form_valid(self, form):
-        # save the new user...
         response = super().form_valid(form)
-        # (optional) log them in immediately:
         login(self.request, self.object)
         return response

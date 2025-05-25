@@ -19,11 +19,15 @@
     <div class="space-x-4">
       <a href="{% url 'manager:task_list' %}" class="font-semibold hover:underline">Tasks</a>
       <a href="{% url 'manager:worker_list' %}" class="font-semibold hover:underline">Workers</a>
+      <a href="{% url 'manager:index' %}" class="font-semibold hover:underline">Main Page</a>
     </div>
     <div class="space-x-4">
       {% if user.is_authenticated %}
         <span>Hi, {{ user.username }}</span>
-        <a href="{% url 'logout' %}" class="hover:underline">Logout</a>
+        <form method="post" action="{% url 'logout' %}" class="inline">
+  {% csrf_token %}
+  <button type="submit" class="hover:underline text-white">Logout</button>
+</form>
       {% else %}
         <a href="{% url 'login' %}" class="hover:underline">Login</a>
         <a href="{% url 'register' %}" class="hover:underline">Register</a>

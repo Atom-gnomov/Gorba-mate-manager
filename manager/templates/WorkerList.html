@@ -11,6 +11,19 @@
     </a>
   </div>
 
+  <!-- Search Form -->
+  <div class="mb-6">
+    <form method="get" action="{% url 'manager:worker_list' %}" class="flex items-center">
+      <input type="text" name="q" placeholder="Search workers by username, name, or position..."
+             value="{{ query }}"
+             class="mr-2 px-4 py-2 w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+      <button type="submit"
+              class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+        Search
+      </button>
+    </form>
+  </div>
+
   {% if workers %}
     <div class="bg-white shadow rounded-lg overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
@@ -39,6 +52,44 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+      <nav class="mt-6">
+        <ul class="pagination flex justify-center space-x-2">
+          {% if page_obj.has_previous %}
+            <li>
+              <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}"
+                 class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                Previous
+              </a>
+            </li>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+              <li>
+                <span class="px-4 py-2 bg-indigo-600 text-white rounded">{{ num }}</span>
+              </li>
+            {% else %}
+              <li>
+                <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}"
+                   class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                  {{ num }}
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <li>
+              <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}"
+                 class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                Next
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
   {% else %}
     <p class="text-gray-600">No workers found.</p>
   {% endif %}
