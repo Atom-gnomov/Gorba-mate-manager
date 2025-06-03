@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views import View
-from django.views.generic import ListView, DetailView, CreateView, DeleteView, FormView
+from django.views.generic import ListView, DetailView, CreateView, DeleteView, FormView, UpdateView
 
 from manager.forms import WorkerCreationForm, CustomRegisterForm
 from manager.models import *
@@ -134,3 +134,23 @@ class RegisterView(FormView):
         position = form.cleaned_data['position']
         Worker.objects.create(user=user, position=position)
         return super().form_valid(form)
+
+
+class WorkerUpdateView(LoginRequiredMixin, UpdateView):
+    """
+    Lets a logged-in user (or an admin) edit an existing Worker row.
+    Reuses Django’s generic UpdateView so only the diff hits the DB.
+    """
+    model = Worker
+
+    # Fields you actually want editable:
+    fields = (
+        "first_name",
+        "last_name",
+        "position",
+        "email",
+        "username",
+    )
+
+    template_name = "WorkerUpdate.html"      # create this file if it doesn't exist
+    success_url = reverse_lazy("manager:worker_list")
