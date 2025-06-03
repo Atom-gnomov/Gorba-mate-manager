@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block title %}All Tasks{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+  {# ───────── Header & "Add task" button ───────── #}
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-semibold">All Tasks</h1>
+    <a href="{% url "manager:task_create" %}" class="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium shadow hover:bg-indigo-700 transition">
+      ＋ Add&nbsp;Task
+    </a>
+  </div>
+
+<form method="get" action="{% url 'manager:task_list' %}">
+    <input type="text" name="q" placeholder="Search tasks..." value="{{ query }}">
+    <button type="submit">Search</button>
+</form>
+
+  {% now "UTC" as utcnow %}
+  {% with sort=request.GET.sort page=request.GET.page %}
+
+  <div class="overflow-x-auto bg-white shadow rounded-lg ring-1 ring-gray-200">
+    <table class="min-w-full text-sm text-left text-gray-800">
+      <thead class="bg-gray-50 text-xs uppercase sticky top-0 z-10">
+        <tr class="divide-x divide-gray-200">
+
+          <th class="px-4 py-3 whitespace-nowrap font-semibold">
+            <a href="?sort={% if sort == 'name' %}-name{% elif sort == '-name' %}name{% else %}name{% endif %}{% if page %}&page={{ page }}{% endif %}" class="hover:underline flex items-center gap-1">
+              Name{% if sort == 'name' %} ▲{% elif sort == '-name' %} ▼{% endif %}
+            </a>
+          </th>
+
+          {# ───────────── Priority column ───────────── #}
+          <th class="px-4 py-3 whitespace-nowrap font-semibold">
+            <a href="?sort={% if sort == 'priority' %}-priority{% elif sort == '-priority' %}priority{% else %}priority{% endif %}{% if page %}&page={{ page }}{% endif %}" class="hover:underline flex items-center gap-1">
+              Priority{% if sort == 'priority' %} ▲{% elif sort == '-priority' %} ▼{% endif %}
+            </a>
+          </th>
+
+          {# ───────────── Deadline column ───────────── #}
+          <th class="px-4 py-3 whitespace-nowrap font-semibold">
+            <a href="?sort={% if sort == 'deadline' %}-deadline{% elif sort == '-deadline' %}deadline{% else %}deadline{% endif %}{% if page %}&page={{ page }}{% endif %}" class="hover:underline flex items-center gap-1">
+              Deadline{% if sort == 'deadline' %} ▲{% elif sort == '-deadline' %} ▼{% endif %}
+            </a>
+          </th>
+
+          {# ───────────── Completed column ───────────── #}
+          <th class="px-4 py-3 whitespace-nowrap font-semibold">
+            <a href="?sort={% if sort == 'is_completed' %}-is_completed{% elif sort == '-is_completed' %}is_completed{% else %}is_completed{% endif %}{% if page %}&page={{ page }}{% endif %}" class="hover:underline flex items-center gap-1">
+              Completed{% if sort == 'is_completed' %} ▲{% elif sort == '-is_completed' %} ▼{% endif %}
+            </a>
+          </th>
+
+          {# ───────────── Task type column ───────────── #}
+          <th class="px-4 py-3 whitespace-nowrap font-semibold">
+            <a href="?sort={% if sort == 'task_type__name' %}-task_type__name{% elif sort == '-task_type__name' %}task_type__name{% else %}task_type__name{% endif %}{% if page %}&page={{ page }}{% endif %}" class="hover:underline flex items-center gap-1">
+              Task&nbsp;Type{% if sort == 'task_type__name' %} ▲{% elif sort == '-task_type__name' %} ▼{% endif %}
+            </a>
+          </th>
+
+          <th class="px-4 py-3">Assignees</th>
+          <th class="px-4 py-3"></th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-gray-100">
+        {% for task in tasks %}
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-3 font-medium">{{ task.name }}</td>
+
+          {# priority badge #}
+          <td class="px-4 py-3">
+            {% if task.priority == 'Urgent' %}
+              <span class="inline-block px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-xs font-semibold">Urgent</span>
+            {% elif task.priority == 'High' %}
+              <span class="inline-block px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 text-xs font-semibold">High</span>
+            {% elif task.priority == 'Normal' %}
+              <span class="inline-block px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">Normal</span>
+            {% else %}
+              <span class="inline-block px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold">Low</span>
+            {% endif %}
+          </td>
+
+          {# deadline #}
+          <td class="px-4 py-3 {% if task.deadline and task.deadline < utcnow and not task.is_completed %}text-red-600 font-semibold{% endif %}">
+            {{ task.deadline|date:"Y-m-d H:i" }}
+          </td>
+
+          <td class="px-4 py-3">
+            {% if task.is_completed %}
+              <span class="inline-block px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-semibold">✔ Done</span>
+            {% else %}—{% endif %}
+          </td>
+
+          <td class="px-4 py-3">{{ task.task_type.name }}</td>
+
+          <td class="px-4 py-3 truncate max-w-[10rem]">
+            {% for w in task.assignees.all %}{% if not forloop.first %}, {% endif %}{{ w.get_full_name|default:w.username }}{% endfor %}
+          </td>
+
+          <td class="px-4 py-3 text-right"><a href="{% url 'manager:task_details' task.pk %}" class="text-indigo-600 hover:underline">View</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="px-4 py-6 text-center italic text-gray-500">No tasks found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if is_paginated %}
+    {% include "pagination.html" with page_obj=page_obj base_qs='?sort='|add:sort|add:'&' %}
+  {% endif %}
+
+  {% endwith %}
+</div>
+{% endblock %}

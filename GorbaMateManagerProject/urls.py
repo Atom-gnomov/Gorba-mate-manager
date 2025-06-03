@@ -1,5 +1,5 @@
 """
-URL configuration for DjangoProject1 project.
+URL configuration for GorbaMateManagerProject project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.2/topics/http/urls/
@@ -14,9 +14,19 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-# from django.contrib import admin
-from django.urls import path
+from django.contrib import admin
+from django.urls import path, include
+from manager.views import RegisterView
 
 urlpatterns = [
-    #    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
+
+    # our custom “register” page
+    path("accounts/register/", RegisterView.as_view(), name="register"),
+
+    # built-in login/logout views + templates under registration/
+    path("accounts/", include("django.contrib.auth.urls")),
+
+    # your app
+    path("", include("manager.urls")),
 ]

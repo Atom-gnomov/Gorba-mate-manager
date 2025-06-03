@@ -1,0 +1,58 @@
+{# templates/base.html #}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}My Manager{% endblock %}</title>
+
+  {# Tailwind (or your own CSS bundle) #}
+  <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <nav class="bg-gray-800 text-white p-4 flex justify-between items-center">
+    <div class="space-x-4">
+      <a href="{% url 'manager:task_list' %}" class="font-semibold hover:underline">Tasks</a>
+      <a href="{% url 'manager:worker_list' %}" class="font-semibold hover:underline">Workers</a>
+      <a href="{% url 'manager:index' %}" class="font-semibold hover:underline">Main Page</a>
+    </div>
+    <div class="space-x-4">
+      {% if user.is_authenticated %}
+        <span>Hi, {{ user.username }}</span>
+        <form method="post" action="{% url 'logout' %}" class="inline">
+  {% csrf_token %}
+  <button type="submit" class="hover:underline text-white">Logout</button>
+</form>
+      {% else %}
+        <a href="{% url 'login' %}" class="hover:underline">Login</a>
+        <a href="{% url 'register' %}" class="hover:underline">Register</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="container mx-auto p-6">
+    {# display Django messages (success, error, etc.) #}
+    {% if messages %}
+      <div class="mb-6 space-y-2">
+        {% for message in messages %}
+          <div class="px-4 py-3 rounded shadow-sm
+                      {% if message.tags == 'error' %}bg-red-100 text-red-800
+                      {% elif message.tags == 'success' %}bg-green-100 text-green-800
+                      {% else %}bg-gray-100 text-gray-800{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </div>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

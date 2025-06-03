@@ -1,0 +1,115 @@
+{# manager/templates/WorkerDetail.html #}
+{% extends "base.html" %}
+
+{% block title %}{{ worker.username }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+  {# ---------------------------------------------------------------- #}
+  {# heading + secondary actions                                      #}
+  {# ---------------------------------------------------------------- #}
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-2xl font-semibold">
+      Worker&nbsp;•&nbsp;{{ worker.first_name }} {{ worker.last_name|default:"" }}
+    </h1>
+
+    <div class="space-x-3">
+      {# ↳ adjust url names / namespaces as needed                     #}
+      <a href="{% url "manager:worker_edit" worker.pk %}"
+         class="px-3 py-1.5 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700">
+        Edit
+      </a>
+      <a href="{% url "manager:worker_delete" worker.pk %}"
+         class="px-3 py-1.5 rounded-md bg-red-600 text-white text-sm hover:bg-red-700">
+        Delete
+      </a>
+    </div>
+  </div>
+
+  {# ---------------------------------------------------------------- #}
+  {# basic profile card                                               #}
+  {# ---------------------------------------------------------------- #}
+  <div class="bg-white shadow rounded-lg p-6">
+    <dl class="divide-y divide-gray-100 text-sm">
+      <div class="py-3 sm:grid sm:grid-cols-4 sm:gap-4">
+        <dt class="font-medium text-gray-600">Username</dt>
+        <dd class="mt-1 sm:col-span-3">{{ worker.username }}</dd>
+      </div>
+      <div class="py-3 sm:grid sm:grid-cols-4 sm:gap-4">
+        <dt class="font-medium text-gray-600">Full&nbsp;name</dt>
+        <dd class="mt-1 sm:col-span-3">
+          {{ worker.first_name }} {{ worker.last_name|default:"—" }}
+        </dd>
+      </div>
+      <div class="py-3 sm:grid sm:grid-cols-4 sm:gap-4">
+        <dt class="font-medium text-gray-600">Email</dt>
+        <dd class="mt-1 sm:col-span-3">
+          {% if worker.email %}<a href="mailto:{{ worker.email }}" class="text-indigo-600 hover:underline">
+            {{ worker.email }}
+          </a>{% else %}—{% endif %}
+        </dd>
+      </div>
+      <div class="py-3 sm:grid sm:grid-cols-4 sm:gap-4">
+        <dt class="font-medium text-gray-600">Position</dt>
+        <dd class="mt-1 sm:col-span-3">{{ worker.position|default:"—" }}</dd>
+      </div>
+      <div class="py-3 sm:grid sm:grid-cols-4 sm:gap-4">
+        <dt class="font-medium text-gray-600">Joined</dt>
+        <dd class="mt-1 sm:col-span-3">{{ worker.date_joined|date:"Y-m-d" }}</dd>
+      </div>
+    </dl>
+  </div>
+
+  {# ---------------------------------------------------------------- #}
+  {# tasks assigned to this worker                                    #}
+  {# ---------------------------------------------------------------- #}
+  <h2 class="text-xl font-semibold mt-10 mb-4">Assigned tasks</h2>
+
+  {% if worker.tasks.exists %}
+    <div class="bg-white shadow rounded-lg overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-50 text-left font-semibold text-gray-600">
+          <tr>
+            <th class="px-4 py-3">Name</th>
+            <th class="px-4 py-3">Priority</th>
+            <th class="px-4 py-3">Deadline</th>
+            <th class="px-4 py-3">Completed</th>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for task in worker.tasks.all %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-2">{{ task.name }}</td>
+              <td class="px-4 py-2">{{ task.priority }}</td>
+              <td class="px-4 py-2">{{ task.deadline|date:"Y-m-d&nbsp;H:i" }}</td>
+              <td class="px-4 py-2">
+                {% if task.is_completed %}
+                  <span class="text-green-600 font-semibold">✔</span>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td class="px-4 py-2 text-right">
+                <a href="{% url 'manager:task_details' task.pk %}"
+                   class="text-indigo-600 hover:underline">View</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-gray-600">No tasks assigned.</p>
+  {% endif %}
+
+  {# ---------------------------------------------------------------- #}
+  {# back link                                                        #}
+  {# ---------------------------------------------------------------- #}
+  <div class="mt-10">
+    <a href="{% url 'manager:worker_list' %}" class="text-indigo-600 hover:underline">
+      ← Back to workers
+    </a>
+  </div>
+</div>
+{% endblock %}
