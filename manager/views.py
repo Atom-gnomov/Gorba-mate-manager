@@ -16,7 +16,7 @@ from django.utils import timezone
 
 PRIO_ORDER = {"Urgent": 0, "High": 1, "Normal": 2, "Low": 3}
 
-class HomePageView(ListView):
+class HomePageView(LoginRequiredMixin,ListView):
     model = Task
     context_object_name = "tasks"
     template_name = "main.html"
@@ -73,19 +73,19 @@ class HomePageView(ListView):
 
 
 
-class TaskDetailView(DetailView):
+class TaskDetailView(LoginRequiredMixin,DetailView):
     model = Task
     context_object_name = "task"
     template_name = "TaskDetails.html"
 
 
-class TaskListView(ListView):
+class TaskListView(LoginRequiredMixin,ListView):
     model = Task
     context_object_name = "tasks"
     template_name = "TaskList.html"
     paginate_by = 10
 
-class TaskCreateView(CreateView):
+class TaskCreateView(LoginRequiredMixin,CreateView):
     model = Task
     context_object_name = "task"
     fields = ("name", "description", "task_type", "priority",
@@ -94,29 +94,29 @@ class TaskCreateView(CreateView):
     template_name = "TaskCreate.html"
 
 
-class WorkerListView(ListView):
+class WorkerListView(LoginRequiredMixin,ListView):
     model = Worker
     context_object_name = "workers"
     template_name = "WorkerList.html"
 
 
-class WorkerDetailView(DetailView):
+class WorkerDetailView(LoginRequiredMixin,DetailView):
     model = Worker
     context_object_name = "worker"
     template_name = "WorkerDetail.html"
 
 
-class WorkerCreateView(CreateView):
+class WorkerCreateView(LoginRequiredMixin,CreateView):
     form_class = WorkerCreationForm
     template_name = 'registration/register.html'
     success_url = reverse_lazy('login')
 
-class WorkerDeleteView(DeleteView):
+class WorkerDeleteView(LoginRequiredMixin,DeleteView):
     model = Worker
     template_name = "WorkerConfirmDelete.html"
     success_url = reverse_lazy("manager:worker_list")
 
-class TaskCompleteView(View):
+class TaskCompleteView(LoginRequiredMixin,View):
     def post(self, request, pk):
         # does a single SQL UPDATE and touches no other columns
         Task.objects.filter(pk=pk).update(is_completed=True)
