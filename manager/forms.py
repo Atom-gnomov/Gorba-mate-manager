@@ -65,7 +65,7 @@ class CustomRegisterForm(UserCreationForm):
     position = forms.ModelChoiceField(
         queryset=Position.objects.all(),
         label="Виберіть посаду",  # Ukrainian for "Choose position"
-        required=True
+        required=False
     )
 
     class Meta:
