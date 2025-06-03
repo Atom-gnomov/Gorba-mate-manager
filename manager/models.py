@@ -17,10 +17,16 @@ class Position(models.Model):
 
 
 class Worker(AbstractUser):
-    position = models.ForeignKey(Position, on_delete=models.CASCADE)
+    position = models.ForeignKey(
+        Position,
+        on_delete=models.SET_NULL,   # keep the row if the position is deleted
+        null=True,                   # <— DB may store NULL
+        blank=True,                  # <— form may leave it empty
+    )
 
     def __str__(self):
         return self.get_full_name() or self.username
+
 
 
 class Task(models.Model):

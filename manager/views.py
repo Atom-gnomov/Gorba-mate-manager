@@ -125,14 +125,12 @@ class TaskCompleteView(LoginRequiredMixin,View):
 
 
 class RegisterView(FormView):
-    template_name = 'registration/register.html'
-    form_class = CustomRegisterForm
-    success_url = reverse_lazy('login')
+    template_name = "registration/register.html"
+    form_class    = CustomRegisterForm
+    success_url   = reverse_lazy("login")
 
     def form_valid(self, form):
-        user = form.save()
-        position = form.cleaned_data['position']
-        Worker.objects.create(user=user, position=position)
+        form.save()                       # form already handles position
         return super().form_valid(form)
 
 

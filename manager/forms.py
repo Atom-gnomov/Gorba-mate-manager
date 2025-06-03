@@ -64,10 +64,25 @@ class WorkerCreationForm(UserCreationForm):
 class CustomRegisterForm(UserCreationForm):
     position = forms.ModelChoiceField(
         queryset=Position.objects.all(),
-        label="Виберіть посаду",  # Ukrainian for "Choose position"
-        required=False
+        label="Виберіть посаду",      # “Choose position”
+        required=False,               # → optional
+        empty_label="— немає —",      # what shows for “no position”
     )
 
-    class Meta:
-        model = Worker
-        fields = ['username', 'email', 'password1', 'password2', 'position']
+    class Meta(UserCreationForm.Meta):
+        model  = Worker
+        fields = (
+            "username",
+            "email",
+            "position",               # ← don’t forget!
+            "password1",
+            "password2",
+        )
+
+    # attach the position before saving
+    def save(self, commit=True):
+        user = super().save(commit=False)                 # Worker instance
+        user.position = self.cleaned_data.get("position") # None or Position
+        if commit:
+            user.save()
+        return user
