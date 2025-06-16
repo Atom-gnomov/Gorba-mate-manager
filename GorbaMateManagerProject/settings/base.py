@@ -10,16 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
-from decouple import config
 from pathlib import Path
 
+from django.conf.global_settings import STATIC_ROOT
+from django.contrib import staticfiles
 from django.core.exceptions import ImproperlyConfigured
 
 
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,12 +28,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-SECRET_KEY = config("DJANGO_SECRET_KEY")
-DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-pa%7#-k2n!^9ox$590s3m!kev-wu6i*l5s(uv&@4)4=0)u)72")
+DEBUG = os.getenv("DJANGO_DEBUG", "").lower() != "False"
 # SECURITY WARNING: don't run with debug turned on in production!
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1"]
 
 # Application definition
 
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+"whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -82,15 +84,7 @@ LOGIN_URL = "login"
 WSGI_APPLICATION = 'GorbaMateManagerProject.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 AUTH_USER_MODEL = "manager.Worker"
 
 # Password validation
@@ -128,6 +122,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = 'staticfiles/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
